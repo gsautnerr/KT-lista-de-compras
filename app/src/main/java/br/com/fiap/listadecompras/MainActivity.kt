@@ -1,8 +1,10 @@
 package br.com.fiap.listadecompras
 
+import ItemsViewModel
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.Button
+import androidx.activity.viewModels
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -19,6 +21,8 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar?.title = "Lista de Compras"
 
+        val viewModel: ItemsViewModel by viewModels()
+
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
         val itemsAdapter = ItemsAdapter()
         recyclerView.adapter = itemsAdapter
@@ -32,15 +36,17 @@ class MainActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val item = ItemModel(
-                name = editText.text.toString(),
-                onRemove = {
-                    itemsAdapter.removeItem(it)
-                }
-            )
 
-            itemsAdapter.addItem(item)
+            viewModel.addItem(editText.text.toString())
             editText.text.clear()
+        }
+
+        /**
+         * Observa as alterações na lista de itens na ViewModel.
+         * Quando a lista de itens é alterada, atualiza o ItemsAdapter com a nova lista.
+         */
+            viewModel.itemsLiveData.observe(this) {
+                    items -> itemsAdapter.updateItems(items)
         }
     }
 }
